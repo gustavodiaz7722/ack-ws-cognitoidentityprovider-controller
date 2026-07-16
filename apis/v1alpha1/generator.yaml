@@ -41,6 +41,103 @@ resources:
         from:
           operation: TagResource
           path: Tags
+      # Cross-resource references to lambda Functions for the UserPool Lambda
+      # triggers. All Lambda trigger fields resolve to the target Function's ARN.
+      LambdaConfig.CreateAuthChallenge:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.CustomMessage:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.DefineAuthChallenge:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PostAuthentication:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PostConfirmation:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PreAuthentication:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PreSignUp:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PreTokenGeneration:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.UserMigration:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.VerifyAuthChallengeResponse:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.CustomEmailSender.LambdaARN:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.CustomSMSSender.LambdaARN:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PreTokenGenerationConfig.LambdaARN:
+        references:
+          resource: Function
+          service_name: lambda
+          path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.KMSKeyID:
+        references:
+          resource: Key
+          service_name: kms
+          path: Status.ACKResourceMetadata.ARN
+      SmsConfiguration.SNSCallerARN:
+        references:
+          resource: Role
+          service_name: iam
+          path: Status.ACKResourceMetadata.ARN
+      # The reference fields above live inside the nested LambdaConfig and
+      # SmsConfiguration structs. Without the set:ignore blocks below, the
+      # Create/Update API response (which carries the resolved concrete ARNs but
+      # has no concept of the *Ref fields) is written back into the spec on
+      # readback, overwriting the parent struct and dropping the user-supplied
+      # *Ref fields. Ignoring the response on the Create/Update paths preserves
+      # the *Ref in the stored spec, while sdkFind (ReadOne) still observes the
+      # real value for delta comparison.
+      LambdaConfig:
+        set:
+          - method: Create
+            ignore: true
+          - method: Update
+            ignore: true
+      SmsConfiguration:
+        set:
+          - method: Create
+            ignore: true
+          - method: Update
+            ignore: true
     hooks:
       sdk_create_post_set_output:
         template_path: hooks/user_pool/sdk_create_post_set_output.go.tpl
