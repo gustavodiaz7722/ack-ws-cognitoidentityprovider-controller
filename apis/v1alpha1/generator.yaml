@@ -41,8 +41,7 @@ resources:
         from:
           operation: TagResource
           path: Tags
-      # Cross-resource references to lambda Functions for the UserPool Lambda
-      # triggers. All Lambda trigger fields resolve to the target Function's ARN.
+      # Lambda trigger cross-resource references (resolve to Function ARN).
       LambdaConfig.CreateAuthChallenge:
         references:
           resource: Function
@@ -118,23 +117,10 @@ resources:
           resource: Role
           service_name: iam
           path: Status.ACKResourceMetadata.ARN
-      # The reference fields above live inside the nested LambdaConfig and
-      # SmsConfiguration structs. Without the set:ignore blocks below, the
-      # Create/Update API response (which carries the resolved concrete ARNs but
-      # has no concept of the *Ref fields) is written back into the spec on
-      # readback, overwriting the parent struct and dropping the user-supplied
-      # *Ref fields. Ignoring the response on the Create/Update paths preserves
-      # the *Ref in the stored spec, while sdkFind (ReadOne) still observes the
-      # real value for delta comparison.
+      # set:ignore keeps the Create/Update response from overwriting the nested
+      # *Ref fields; late_initialize absorbs the empty LambdaConfig{} AWS returns
+      # when lambdaConfig is omitted (avoids a perpetual diff).
       LambdaConfig:
-        # late_initialize absorbs the empty LambdaConfig{} that DescribeUserPool
-        # returns when the user omits lambdaConfig. Without it, set:ignore leaves
-        # the desired spec nil while ReadOne observes {}, producing a perpetual
-        # diff for the common "no lambda triggers" case. When a *Ref is supplied,
-        # references resolve before late-init and the struct is already populated,
-        # so the copy guard skips it and the ref is preserved. skip_incomplete_check
-        # keeps a legitimately-absent config from trapping the resource in
-        # incomplete late-initialization.
         late_initialize:
           skip_incomplete_check: {}
         set:
