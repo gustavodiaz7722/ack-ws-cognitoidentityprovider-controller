@@ -125,6 +125,11 @@ resources:
           resource: Role
           service_name: iam
           path: Status.ACKResourceMetadata.ARN
+      # AWS defaults SNSRegion to the user pool's region when omitted; late-init
+      # absorbs it so a partial smsConfiguration doesn't perpetually diff.
+      SmsConfiguration.SNSRegion:
+        late_initialize:
+          skip_incomplete_check: {}
       # set:ignore keeps the Create/Update response from overwriting the nested
       # *Ref fields; late_initialize absorbs the empty LambdaConfig{} AWS returns
       # when lambdaConfig is omitted (avoids a perpetual diff).
