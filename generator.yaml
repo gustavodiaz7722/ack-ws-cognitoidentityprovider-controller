@@ -78,10 +78,18 @@ resources:
           service_name: lambda
           path: Status.ACKResourceMetadata.ARN
       LambdaConfig.PreTokenGeneration:
+        # Cognito mirrors PreTokenGeneration (deprecated) and
+        # PreTokenGenerationConfig; setting one makes AWS echo the other, so
+        # late-init both leaves to absorb the mirrored value and avoid a diff.
+        late_initialize:
+          skip_incomplete_check: {}
         references:
           resource: Function
           service_name: lambda
           path: Status.ACKResourceMetadata.ARN
+      LambdaConfig.PreTokenGenerationConfig:
+        late_initialize:
+          skip_incomplete_check: {}
       LambdaConfig.UserMigration:
         references:
           resource: Function

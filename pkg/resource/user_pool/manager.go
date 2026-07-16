@@ -50,7 +50,7 @@ var (
 // +kubebuilder:rbac:groups=cognitoidentityprovider.services.k8s.aws,resources=userpools,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cognitoidentityprovider.services.k8s.aws,resources=userpools/status,verbs=get;update;patch
 
-var lateInitializeFieldNames = []string{"LambdaConfig"}
+var lateInitializeFieldNames = []string{"LambdaConfig", "PreTokenGeneration", "PreTokenGenerationConfig"}
 
 // resourceManager is responsible for providing a consistent way to perform
 // CRUD operations in a backend AWS service API for Book custom resources.
@@ -264,6 +264,16 @@ func (rm *resourceManager) lateInitializeFromReadOneOutput(
 	latestKo := rm.concreteResource(latest).ko.DeepCopy()
 	if observedKo.Spec.LambdaConfig != nil && latestKo.Spec.LambdaConfig == nil {
 		latestKo.Spec.LambdaConfig = observedKo.Spec.LambdaConfig
+	}
+	if observedKo.Spec.LambdaConfig != nil && latestKo.Spec.LambdaConfig != nil {
+		if observedKo.Spec.LambdaConfig.PreTokenGeneration != nil && latestKo.Spec.LambdaConfig.PreTokenGeneration == nil {
+			latestKo.Spec.LambdaConfig.PreTokenGeneration = observedKo.Spec.LambdaConfig.PreTokenGeneration
+		}
+	}
+	if observedKo.Spec.LambdaConfig != nil && latestKo.Spec.LambdaConfig != nil {
+		if observedKo.Spec.LambdaConfig.PreTokenGenerationConfig != nil && latestKo.Spec.LambdaConfig.PreTokenGenerationConfig == nil {
+			latestKo.Spec.LambdaConfig.PreTokenGenerationConfig = observedKo.Spec.LambdaConfig.PreTokenGenerationConfig
+		}
 	}
 	return &resource{latestKo}
 }
