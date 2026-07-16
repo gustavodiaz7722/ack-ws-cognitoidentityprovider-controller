@@ -127,6 +127,16 @@ resources:
       # the *Ref in the stored spec, while sdkFind (ReadOne) still observes the
       # real value for delta comparison.
       LambdaConfig:
+        # late_initialize absorbs the empty LambdaConfig{} that DescribeUserPool
+        # returns when the user omits lambdaConfig. Without it, set:ignore leaves
+        # the desired spec nil while ReadOne observes {}, producing a perpetual
+        # diff for the common "no lambda triggers" case. When a *Ref is supplied,
+        # references resolve before late-init and the struct is already populated,
+        # so the copy guard skips it and the ref is preserved. skip_incomplete_check
+        # keeps a legitimately-absent config from trapping the resource in
+        # incomplete late-initialization.
+        late_initialize:
+          skip_incomplete_check: {}
         set:
           - method: Create
             ignore: true
